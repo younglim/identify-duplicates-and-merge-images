@@ -9,7 +9,7 @@ if ! brew ls --versions imagemagick gs> /dev/null; then
 fi
 
 # Bigger number will result in false-positive detection of duplicate images
-threshold=0.005
+threshold=0.001
 
 # PDF to JPG Conversion Quality (dpi)
 dpi=300
@@ -72,9 +72,14 @@ function render_pdf_find_dup_and_move () {
 
 		cd "$basedir/$folder"
 
+		num_of_images=$(ls -p *.{jpg,jpeg,png,gif} | wc -l)
+		iter=$((num_of_images + 1 / 2))
+			
 		for image1 in *.{jpg,jpeg,png,gif}; do
-			if [ -f "$image1" ]; then 
+
+			if [ -f "$image1" ] && [ "$iter" -gt "1" ]; then 
 				for image2 in *.{jpg,jpeg,png,gif}; do
+					
 					if [ -f "$image1" ] &&[ "$image1" != "$image2" ]; then
 						value=$(compare -metric phash "$image1" "$image2" null: 2>&1);
 
@@ -88,10 +93,13 @@ function render_pdf_find_dup_and_move () {
 
 						fi
 					fi
-
 				done
-				
+			
+			
 			fi
+			
+			iter=$((iter -1))
+
 		done
 
 
