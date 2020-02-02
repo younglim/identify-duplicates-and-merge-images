@@ -38,8 +38,8 @@ chmod +x "$outputcmd"
 rm -rf "$basedir/merged/$folder.jpg"
 # echo compare -metric RMSE $filenames NULL: >> $outputcmd
 
-for folder in */; do
-
+# Function to traverse and do operation
+function render_pdf_find_dup_and_move () {
 	if [ "$folder" != "merged/" ] && [ "$folder" != "moved_duplicate/" ] && [ "$folder" != "moved_pdf/" ]; then
 	
 		cd "$basedir/$folder"
@@ -58,12 +58,15 @@ for folder in */; do
 
 			# Fix ? character in filename
 			if ls *.jpg &> /dev/null; then
-				for filename in *; do mv "$filename" "$(echo $filename | tr '?' '-')" ; done
+				for filename in *; do 
+					if [ -f "$filename" ]; then 
+						mv "$filename" "$(echo $filename | tr '?' '-')" ; 
+					fi
+				done
 			fi	
 		fi	
 
-    	# Will print */ if no directories are available
-    	cd "$basedir/$folder"
+		cd "$basedir/$folder"
 
 		for image1 in *.{jpg,jpeg,png,gif}; do
 			if [ -f "$image1" ]; then 
@@ -88,15 +91,36 @@ for folder in */; do
 		done
 
 
-		filenames=$(ls | sed -e 's/^/"/g' -e 's/$/"/g' | tr '\n' ' ')
+		filenames=$(ls -p | grep -v / | sed -e 's/^/"/g' -e 's/$/"/g' | tr '\n' ' ')
+		echo $filenames
 		echo cd \"$basedir/$folder\" >> "$outputcmd"
-		echo convert $filenames -append \"$basedir/merged/${folder///}.jpg\" >> "$outputcmd"
+
+		num_dir="${folder//[^/]}"
+
+		if (( ${#num_dir} >= 2 )); then
+			echo convert $filenames -append \"$basedir/merged/$(echo $folder | sed 's:/*$::'| sed -e 's/\//-/g').jpg\" >> "$outputcmd"
+		else 
+			echo convert $filenames -append \"$(echo $basedir/merged/$folder | sed 's:/*$::').jpg\" >> "$outputcmd"
+		
+		fi
 		
 		echo -e $'\n\n' >> "$outputcmd"
 		
 	fi
 
-	
+}
+
+
+for outerfolder in */; do
+	# Cater for 1 level of nested folder
+	cd "$basedir/$outerfolder"
+	for folder in */; do
+		folder="$outerfolder$folder"
+		render_pdf_find_dup_and_move
+	done
+
+	folder="$outerfolder"
+	render_pdf_find_dup_and_move
 done
 
 echo -e $'\n====================\n' Merging images in individual folder to \"$merged_folder\"
