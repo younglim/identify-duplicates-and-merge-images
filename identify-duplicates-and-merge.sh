@@ -31,7 +31,7 @@ mkdir -p "$moved_duplicate"
 
 merged_folder="$basedir/merged"
 
-echo -e Finding folders within $PWD $'\n'
+echo -e Finding folders within \"$PWD\" $'\n'
 
 touch "$outputcmd"
 rm "$outputcmd"
@@ -95,18 +95,23 @@ function render_pdf_find_dup_and_move () {
 
 
 		filenames=$(ls -p | grep -v / | sed -e 's/^/"/g' -e 's/$/"/g' | tr '\n' ' ')
-		echo cd \"$basedir/$folder\" >> "$outputcmd"
 
-		num_dir="${folder//[^/]}"
+		if [ ! -z "$filenames" ]; then
 
-		if (( ${#num_dir} >= 2 )); then
-			echo convert -quality $quality $filenames -append \"$basedir/merged/$(echo $folder | sed 's:/*$::'| sed -e 's/\//-/g').jpg\" >> "$outputcmd"
-		else 
-			echo convert -quality $quality $filenames -append \"$(echo $basedir/merged/$folder | sed 's:/*$::').jpg\" >> "$outputcmd"
-		
+			echo cd \"$basedir/$folder\" >> "$outputcmd"
+
+			num_dir="${folder//[^/]}"
+
+			if (( ${#num_dir} >= 2 )); then
+				echo convert -quality $quality $filenames -append \"$basedir/merged/$(echo $folder | sed 's:/*$::'| sed -e 's/\//-/g').jpg\" >> "$outputcmd"
+			else 
+				echo convert -quality $quality $filenames -append \"$(echo $basedir/merged/$folder | sed 's:/*$::').jpg\" >> "$outputcmd"
+			
+			fi
+			
+			echo -e $'\n\n' >> "$outputcmd"
+			
 		fi
-		
-		echo -e $'\n\n' >> "$outputcmd"
 		
 	fi
 
