@@ -14,6 +14,9 @@ threshold=0.01
 # PDF to JPG Conversion Quality (dpi)
 dpi=300
 
+# Quality of JPG Compression
+quality=95
+
 # Sets nullglob
 shopt -s nullglob 
 
@@ -92,15 +95,14 @@ function render_pdf_find_dup_and_move () {
 
 
 		filenames=$(ls -p | grep -v / | sed -e 's/^/"/g' -e 's/$/"/g' | tr '\n' ' ')
-		echo $filenames
 		echo cd \"$basedir/$folder\" >> "$outputcmd"
 
 		num_dir="${folder//[^/]}"
 
 		if (( ${#num_dir} >= 2 )); then
-			echo convert $filenames -append \"$basedir/merged/$(echo $folder | sed 's:/*$::'| sed -e 's/\//-/g').jpg\" >> "$outputcmd"
+			echo convert -quality $quality $filenames -append \"$basedir/merged/$(echo $folder | sed 's:/*$::'| sed -e 's/\//-/g').jpg\" >> "$outputcmd"
 		else 
-			echo convert $filenames -append \"$(echo $basedir/merged/$folder | sed 's:/*$::').jpg\" >> "$outputcmd"
+			echo convert -quality $quality $filenames -append \"$(echo $basedir/merged/$folder | sed 's:/*$::').jpg\" >> "$outputcmd"
 		
 		fi
 		
