@@ -9,7 +9,7 @@ if ! brew ls --versions imagemagick gs> /dev/null; then
 fi
 
 # Bigger number will result in false-positive detection of duplicate images
-threshold=0.01
+threshold=0.005
 
 # PDF to JPG Conversion Quality (dpi)
 dpi=300
