@@ -43,7 +43,8 @@ rm -rf "$basedir/merged/$folder.jpg"
 
 # Function to traverse and do operation
 function render_pdf_find_dup_and_move () {
-	if [ "$folder" != "merged/" ] && [ "$folder" != "moved_duplicate/" ] && [ "$folder" != "moved_pdf/" ]; then
+	
+	if ! ( [[ "$folder" == "merged/"* ]] || [[ "$folder" == "moved_duplicate/"* ]] || [[ "$folder" == "moved_pdf"* ]] ); then
 	
 		cd "$basedir/$folder"
 		echo Checking \"$folder\"
